@@ -2849,10 +2849,26 @@ the C-API is needed then some additional steps must be taken.
 
 .. cfunction:: void import_array(void)
 
-    This function must be called in the initialization section of a
+    This function macro must be called in the initialization section of a
     module that will make use of the C-API. It imports the module
     where the function-pointer table is stored and points the correct
     variable to it.
+
+    ``import_array()`` adds a return on import error to facilitate a graceful
+    error when numpy isn't available. Generally, you'd use ``import_array()``
+    in a module init function (in which case you'll be fine), but if you're
+    using it in a separate function (or need to initialize outside of a
+    module-initiating function), you'll need to use a compatible type
+    signature.   In Python 3 and above, it returns NULL, whereas Python 2.X,
+    has a bare return.  The following signature is the minimum required for
+    compatibility. ``void * can be replaced by PyMODINIT_FUNC``
+
+    .. code-block: c
+        #if (PY_VERSION_HEX >= 0x03000000)
+        void *yourFunction(...)
+        #else
+        void yourFunction(...)
+        #endif
 
 .. cmacro:: PY_ARRAY_UNIQUE_SYMBOL
 
